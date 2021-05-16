@@ -4,13 +4,13 @@
 # 16.05.2021 15:00 NSK
 # Gasymov Sakhib
 #
-# WORKDIR ~home/script/lesson_1
+# WORKDIR ~lesson_2
 #
 NODE2=172.31.29.146
 SYNC=1		# Enabled sync
 KEEPDAY=7	# Number of day keep files
 
-WORKDIR=/home/ubuntu/scripts/lesson_1
+WORKDIR=$HOME/scripts/lesson_2
 DATADIR=$WORKDIR/data
 LOGFL=$WORKDIR/log/`basename $0`.`date +%Y-%m-%d`.log
 
