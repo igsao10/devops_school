@@ -1,0 +1,49 @@
+#!/bin/bash
+#
+# DevOps School. Lesson 2
+# 16.05.2021 15:00 NSK
+# Gasymov Sakhib
+#
+# WORKDIR ~home/script/lesson_1
+#
+NODE2=172.31.29.146
+SYNC=1		# Enabled sync
+KEEPDAY=7	# Number of day keep files
+
+WORKDIR=/home/ubuntu/scripts/lesson_1
+DATADIR=$WORKDIR/data
+LOGFL=$WORKDIR/log/`basename $0`.`date +%Y-%m-%d`.log
+
+logging() {
+    echo "`date '+%d %Y %b %T'` [$1] $2" >> $LOGFL
+}
+
+logging INF "Starting generate random files" 
+for i in {1..10}
+do
+    sid=`cat /dev/urandom | tr -cd 'a-f0-9' | head -c 8`
+    base64 /dev/urandom | head -c 5000 > $DATADIR/data.$sid
+    logging INF "Generated file [data.$sid]"
+done
+
+syncfile() {
+    logging INF "Sync enabled, start syncronizing..."
+    ssh ubuntu@$NODE2 -C "[ ! -d $DATADIR ] && mkdir -p $DATADIR"
+    rsync -r $DATADIR ubuntu@$NODE2:$WORKDIR/
+    status=$?
+    [ $status -ne 0 ] && logging ERR "can't sync files on remote node"
+    logging INF "sync finished"
+}
+
+[ $SYNC = "1" ] && syncfile
+
+clearfile() {
+    logging INF "Cheking local datadir and removing files older than $KEEPDAY days"
+    find $DATADIR -mtime +$KEEPDAY -type f -delete
+
+    logging INF "Cheking remote datadir and removing files older than $KEEPDAY days"
+    ssh ubuntu@$NODE2 -C "find $DATADIR -mtime +$KEEPDAY -type f -delete"
+}
+
+logging INF "Finished"
+
