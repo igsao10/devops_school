@@ -1,0 +1,56 @@
+---
+- name: Install docker on stage and prom hosts
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Ensure docker package is present
+    apt: 
+      name: docker.io
+      state: present
+      update_cache: yes
+
+- name: Install maven package
+  hosts: stage
+  become: yes
+  vars:
+    workspace: /tmp/files/boxfuse-sample-java-war-hello
+
+  tasks:
+  - name: Ensure maven package is present
+    apt: 
+      name: maven
+      state: present
+
+  - name: Build docker images with java app
+    copy:
+     src: files/
+     dest: /tmp/files/
+
+  - name: Git boxfuse repository is cloned
+    git:
+      repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
+      dest: "{{ workspace }}"
+
+  - name: Build sample app
+    shell: mvn package chdir="{{ workspace }}"
+
+  - name: Log into DockerHub
+    docker_login:
+      username: igsao10
+      password: {{ password }}
+
+  - name: build container image
+    docker_image:
+      name: lesson08
+      build:
+        path: /tmp/files/Dockerfile
+      source: build
+
+  - name: Tag and push to docker hub
+    docker_image:
+      name: lesson08
+      repository: igsao10/lesson08:latest
+      push: yes
+      source: local
+
