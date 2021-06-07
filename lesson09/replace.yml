@@ -1,0 +1,11 @@
+---
+- name: Install docker on stage and prom hosts
+  hosts: stage
+  become: yes
+
+  tasks:
+  - name: Long form task does not
+    replace:
+      path: /var/www/html/index.nginx-debian.html
+      regexp: '<h1>Welcome to nginx!</h1>'
+      replace: '<p><script> document.write (new Date().toLocaleDateString()); </script></p>'

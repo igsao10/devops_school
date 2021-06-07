@@ -54,3 +54,7 @@
       push: yes
       source: local
 
+- name: Install docker image on Prod
+  hosts: prod
+  become: yes
+
